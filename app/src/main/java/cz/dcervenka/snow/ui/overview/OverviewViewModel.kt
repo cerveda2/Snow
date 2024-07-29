@@ -6,6 +6,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import cz.dcervenka.snow.network.SnowService
+import cz.dcervenka.snow.network.safeCall
 import cz.dcervenka.snow.ui.util.UiText
 import cz.dcervenka.snow.ui.util.asUiText
 import cz.dcervenka.snow.util.Result
@@ -35,12 +36,13 @@ class OverviewViewModel @Inject constructor(
     private fun loadPlaces() {
         viewModelScope.launch {
             try {
-                when (val result = snowService.loadPlaces("cz")) {
-                    is Result.Error -> _errorEvent.send(result.error.asUiText())
-                    is Result.Success -> state = state.copy(data = result.data)
+                val response = safeCall { snowService.loadPlaces() }
+                when (response) {
+                    is Result.Error -> _errorEvent.send(response.error.asUiText())
+                    is Result.Success -> state = state.copy(data = response.data)
                 }
             } catch (e: Exception) {
-                Timber.w("Failed to load data")
+                Timber.w("Failed to load data or call cancelled")
             }
         }
     }

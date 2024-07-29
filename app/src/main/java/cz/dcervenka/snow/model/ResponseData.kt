@@ -39,5 +39,5 @@ enum class SnowType {
     WET,
     FROZEN,
     FIRN,
-    ARTIFICAL
+    ARTIFICIAL
 }

@@ -83,6 +83,7 @@ dependencies {
     implementation(libs.hilt.navigation.compose)
 
     implementation(libs.retrofit)
+    implementation(libs.moshi.converter)
     implementation(libs.moshi)
     implementation(libs.okhttp.interceptor)
 

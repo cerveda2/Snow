@@ -1,7 +1,9 @@
 package cz.dcervenka.snow.di
 
 import com.squareup.moshi.Moshi
+import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import cz.dcervenka.snow.BuildConfig
+import cz.dcervenka.snow.network.CurlLoggingInterceptor
 import cz.dcervenka.snow.network.SnowService
 import dagger.Module
 import dagger.Provides
@@ -21,14 +23,19 @@ object NetworkModule {
     @Provides
     @Singleton
     fun provideMoshi(): Moshi {
-        return Moshi.Builder().build()
+        return Moshi.Builder()
+            .add(KotlinJsonAdapterFactory())
+            .build()
     }
 
     @Provides
     @Singleton
     fun provideLoggingInterceptor(): HttpLoggingInterceptor {
         val logging = HttpLoggingInterceptor { message -> Timber.d(message) }
-        logging.setLevel(HttpLoggingInterceptor.Level.BODY)
+        logging.setLevel(
+            if (BuildConfig.DEBUG) HttpLoggingInterceptor.Level.BODY
+            else HttpLoggingInterceptor.Level.NONE
+        )
         return logging
     }
 
@@ -37,6 +44,7 @@ object NetworkModule {
     fun provideOkHttpClient(loggingInterceptor: HttpLoggingInterceptor): OkHttpClient {
         return OkHttpClient.Builder()
             .addInterceptor(loggingInterceptor)
+            .addInterceptor(CurlLoggingInterceptor())
             .build()
     }
 
@@ -51,9 +59,8 @@ object NetworkModule {
             .build()
     }
 
-    @Singleton
     @Provides
+    @Singleton
     fun provideApiService(retrofit: Retrofit): SnowService =
         retrofit.create(SnowService::class.java)
-
 }
