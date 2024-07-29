@@ -8,12 +8,14 @@ import cz.dcervenka.snow.ui.theme.SnowTheme
 @Composable
 fun DetailScreenRoot(
     onMoreInfoClick: () -> Unit,
+    onBackClick: () -> Unit,
     viewModel: DetailViewModel = hiltViewModel()
 ) {
     DetailScreen(
         onAction = { action ->
             when (action) {
                 DetailAction.OnVisitPlace -> onMoreInfoClick()
+                DetailAction.OnBackClick -> onBackClick()
                 else -> Unit
             }
         }

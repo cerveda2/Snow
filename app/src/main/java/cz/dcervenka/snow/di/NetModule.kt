@@ -2,6 +2,7 @@ package cz.dcervenka.snow.di
 
 import com.squareup.moshi.Moshi
 import cz.dcervenka.snow.BuildConfig
+import cz.dcervenka.snow.network.SnowService
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -49,5 +50,10 @@ object NetworkModule {
             .client(okHttpClient)
             .build()
     }
+
+    @Singleton
+    @Provides
+    fun provideApiService(retrofit: Retrofit): SnowService =
+        retrofit.create(SnowService::class.java)
 
 }
