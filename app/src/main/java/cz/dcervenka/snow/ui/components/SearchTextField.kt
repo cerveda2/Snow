@@ -9,6 +9,7 @@ import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
@@ -32,9 +33,13 @@ fun SearchTextField(
         modifier = modifier
             .fillMaxWidth()
             .padding(16.dp),
-        placeholder = { Text(text = "Search") },
+        placeholder = { Text(text = "Najít středisko") },
         leadingIcon = {
-            Icon(imageVector = Icons.Default.Search, contentDescription = null)
+            Icon(
+                imageVector = Icons.Default.Search,
+                //tint = MaterialTheme.colorScheme.secondaryContainer,
+                contentDescription = null
+            )
         },
         trailingIcon = {
             IconButton(onClick = {
@@ -43,11 +48,14 @@ fun SearchTextField(
                 Icon(
                     imageVector = if (favoriteToggled) Icons.Filled.Favorite
                     else Icons.Filled.FavoriteBorder,
+                    //tint = MaterialTheme.colorScheme.secondaryContainer,
                     contentDescription = null
                 )
             }
         },
-        colors = OutlinedTextFieldDefaults.colors(),
+        colors = OutlinedTextFieldDefaults.colors(
+            focusedBorderColor = MaterialTheme.colorScheme.secondaryContainer
+        ),
         shape = CircleShape
     )
 }

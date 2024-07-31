@@ -29,7 +29,7 @@ data class Resort(
     val liftOpen: Int?,
     val tracksTotalKm: Float?,
     val tracksOpenKm: Float?,
-    var favorite: Boolean = false
+    //var favorite: Boolean = false
 )
 
 enum class SnowType {

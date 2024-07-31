@@ -12,6 +12,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
+import cz.dcervenka.snow.ui.components.ExpandableAreaList
 import cz.dcervenka.snow.ui.components.SearchTextField
 import cz.dcervenka.snow.ui.theme.SnowTheme
 
@@ -57,6 +58,7 @@ fun OverviewScreen(
                     onAction(OverviewAction.OnSearchTextChanged(it.text))
                 }
             )
+            ExpandableAreaList(responseData = state.data)
         }
     }
 
