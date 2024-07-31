@@ -55,14 +55,36 @@ private val LightColorScheme = lightColorScheme(
     */
 )
 
+private val LightColorSchemeV2 = lightColorScheme(
+    primary = LightPrimary,
+    primaryContainer = LightPrimaryContainer,
+    background = LightBackground,
+    surface = LightSurface,
+    onPrimary = LightOnPrimary,
+    onSecondary = LightOnSecondary,
+    onBackground = LightOnBackground,
+    onSurface = LightOnSurface
+)
+
+private val DarkColorSchemeV2 = darkColorScheme(
+    primary = DarkPrimary,
+    primaryContainer = DarkPrimaryContainer,
+    background = DarkBackground,
+    surface = DarkSurface,
+    onPrimary = DarkOnPrimary,
+    onSecondary = DarkOnSecondary,
+    onBackground = DarkOnBackground,
+    onSurface = DarkOnSurface
+)
+
 @Composable
 fun SnowTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {
-        darkTheme -> DarkColorScheme
-        else -> LightColorScheme
+        darkTheme -> DarkColorSchemeV2
+        else -> LightColorSchemeV2
     }
 
     MaterialTheme(

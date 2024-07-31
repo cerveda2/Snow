@@ -58,7 +58,11 @@ fun OverviewScreen(
                     onAction(OverviewAction.OnSearchTextChanged(it.text))
                 }
             )
-            ExpandableAreaList(responseData = state.data)
+            ExpandableAreaList(
+                responseData = state.data,
+                onDetailClick = {},
+                onFavoriteClick = {},
+            )
         }
     }
 
