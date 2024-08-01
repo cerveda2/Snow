@@ -26,11 +26,13 @@ fun OverviewScreenRoot(
         onAction = { action ->
             when (action) {
                 OverviewAction.OnDetailClick -> onDetailClick()
-                is OverviewAction.OnFavoritePlace -> {
+                is OverviewAction.OnFavoriteToggled -> {
                     viewModel.toggleFavorite()
                 }
-                is OverviewAction.OnListExpand -> Unit
                 is OverviewAction.OnSearchTextChanged -> Unit
+                is OverviewAction.OnFavoriteSet -> {
+                    viewModel.setFavorite(action.resortId)
+                }
             }
         }
     )
@@ -51,8 +53,8 @@ fun OverviewScreen(
         ) {
             SearchTextField(
                 textState = searchState,
-                favoriteToggled = state.isFavoriteChecked,
-                onFavoriteToggled = { onAction(OverviewAction.OnFavoritePlace) },
+                favoriteToggled = state.showOnlyFavorites,
+                onFavoriteToggled = { onAction(OverviewAction.OnFavoriteToggled) },
                 onTextChange = {
                     searchState = it
                     onAction(OverviewAction.OnSearchTextChanged(it.text))
@@ -60,8 +62,9 @@ fun OverviewScreen(
             )
             ExpandableAreaList(
                 responseData = state.data,
+                showOnlyFavorites = state.showOnlyFavorites,
                 onDetailClick = {},
-                onFavoriteClick = {},
+                onSetFavorite = { resortId -> onAction(OverviewAction.OnFavoriteSet(resortId)) },
             )
         }
     }

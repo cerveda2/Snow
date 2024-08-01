@@ -5,6 +5,6 @@ import cz.dcervenka.snow.model.ResponseData
 
 data class OverviewState(
     val search: TextFieldValue = TextFieldValue(),
-    val isFavoriteChecked: Boolean = false,
+    val showOnlyFavorites: Boolean = false,
     val data: ResponseData = ResponseData()
 )

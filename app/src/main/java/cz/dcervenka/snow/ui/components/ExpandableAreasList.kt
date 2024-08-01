@@ -1,7 +1,12 @@
 package cz.dcervenka.snow.ui.components
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -13,11 +18,13 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -32,6 +39,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -48,8 +56,9 @@ import cz.dcervenka.snow.ui.util.formatTracksAvailable
 @Composable
 fun ExpandableAreaList(
     responseData: ResponseData,
+    showOnlyFavorites: Boolean,
     onDetailClick: (String) -> Unit,
-    onFavoriteClick: (String) -> Unit
+    onSetFavorite: (String) -> Unit
 ) {
 
     val areas = responseData.areas ?: emptyList()
@@ -59,20 +68,33 @@ fun ExpandableAreaList(
 
     LazyColumn {
         items(areas) { area ->
-            ExpandableAreaItem(
-                area = area,
-                resorts = resorts.filter { it.areaId == area.areaId },
-                expanded = expandedAreaIds.contains(area.areaId),
-                onClick = {
-                    expandedAreaIds = if (expandedAreaIds.contains(area.areaId)) {
-                        expandedAreaIds - area.areaId
-                    } else {
-                        expandedAreaIds + area.areaId
-                    }
-                },
-                onDetailClick = onDetailClick,
-                onFavoriteClick = onFavoriteClick,
-            )
+            val visibleResorts = resorts.filter {
+                if (showOnlyFavorites) {
+                    it.areaId == area.areaId && it.favorite
+                } else it.areaId == area.areaId
+            }
+
+            // Only display the area if there are visible resorts
+            AnimatedVisibility(
+                visible = visibleResorts.isNotEmpty(),
+                enter = fadeIn() + expandVertically(),
+                exit = fadeOut() + shrinkVertically()
+            ) {
+                ExpandableAreaItem(
+                    area = area,
+                    resorts = visibleResorts,
+                    expanded = expandedAreaIds.contains(area.areaId),
+                    onClick = {
+                        expandedAreaIds = if (expandedAreaIds.contains(area.areaId)) {
+                            expandedAreaIds - area.areaId
+                        } else {
+                            expandedAreaIds + area.areaId
+                        }
+                    },
+                    onDetailClick = onDetailClick,
+                    onFavoriteClick = onSetFavorite,
+                )
+            }
         }
     }
 }
@@ -209,7 +231,8 @@ fun ResortItem(
                 modifier = Modifier.clickable {
                     onFavoriteClick()
                 },
-                imageVector = Icons.Default.FavoriteBorder,
+                imageVector = if (resort.favorite) Icons.Filled.Favorite
+                else Icons.Filled.FavoriteBorder,
                 contentDescription = null
             )
         }

@@ -9,6 +9,7 @@ import cz.dcervenka.snow.network.SnowService
 import cz.dcervenka.snow.network.safeCall
 import cz.dcervenka.snow.ui.util.UiText
 import cz.dcervenka.snow.ui.util.asUiText
+import cz.dcervenka.snow.util.DataError
 import cz.dcervenka.snow.util.Result
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
@@ -42,12 +43,25 @@ class OverviewViewModel @Inject constructor(
                     is Result.Success -> state = state.copy(data = response.data)
                 }
             } catch (e: Exception) {
+                _errorEvent.send(DataError.Network.UNKNOWN.asUiText())
                 Timber.w("Failed to load data or call cancelled")
             }
         }
     }
 
     fun toggleFavorite() {
-        state = state.copy(isFavoriteChecked = !state.isFavoriteChecked)
+        state = state.copy(showOnlyFavorites = !state.showOnlyFavorites)
+    }
+
+    fun setFavorite(resortId: String) {
+        val updatedResorts = state.data.resorts?.map { resort ->
+            if (resort.resortId == resortId) {
+                resort.copy(favorite = !resort.favorite)
+            } else {
+                resort
+            }
+        }
+        val updatedData = state.data.copy(resorts = updatedResorts)
+        state = state.copy(data = updatedData)
     }
 }

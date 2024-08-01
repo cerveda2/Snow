@@ -32,6 +32,7 @@ val LightOnPrimary = Color(0xFF000000) // Black for text on primary
 val LightOnSecondary = Color(0xFF000000) // Black for text on secondary
 val LightOnBackground = Color(0xFF333333) // Dark Grey for primary text
 val LightOnSurface = Color(0xFF333333) // Dark Grey for text
+
 val Orange = Color(0xFFF5A65B) // Orange
 val ColombiaBlue = Color(0xFFCBDCE7) // Colombia Blue
 
