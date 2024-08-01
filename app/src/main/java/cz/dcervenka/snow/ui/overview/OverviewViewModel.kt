@@ -1,5 +1,6 @@
 package cz.dcervenka.snow.ui.overview
 
+import android.content.SharedPreferences
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -18,9 +19,13 @@ import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
 
+const val SHARED_PREFERENCES_NAME = "sharedPref"
+const val KEY_FAVORITES = "KEY_FAVORITES"
+
 @HiltViewModel
 class OverviewViewModel @Inject constructor(
     private val snowService: SnowService,
+    private val sharedPreferences: SharedPreferences,
 ): ViewModel() {
 
     var state by mutableStateOf(OverviewState())
@@ -40,7 +45,10 @@ class OverviewViewModel @Inject constructor(
                 val response = safeCall { snowService.loadPlaces() }
                 when (response) {
                     is Result.Error -> _errorEvent.send(response.error.asUiText())
-                    is Result.Success -> state = state.copy(data = response.data)
+                    is Result.Success -> {
+                        state = state.copy(data = response.data)
+                        initializeState()
+                    }
                 }
             } catch (e: Exception) {
                 _errorEvent.send(DataError.Network.UNKNOWN.asUiText())
@@ -63,5 +71,29 @@ class OverviewViewModel @Inject constructor(
         }
         val updatedData = state.data.copy(resorts = updatedResorts)
         state = state.copy(data = updatedData)
+
+        val favoriteResorts = updatedResorts?.filter { it.favorite }?.map { it.resortId }?.toSet() ?: emptySet()
+        saveFavoritesToPreferences(favoriteResorts)
+    }
+
+    private fun initializeState() {
+        val favoriteResorts = getFavoritesFromPreferences()
+
+        val resorts = state.data.resorts?.map { resort ->
+            resort.copy(favorite = favoriteResorts.contains(resort.resortId))
+        }
+
+        state = state.copy(data = state.data.copy(resorts = resorts))
+    }
+
+    private fun getFavoritesFromPreferences(): Set<String> {
+        return sharedPreferences.getStringSet(KEY_FAVORITES, emptySet()) ?: emptySet()
+    }
+
+    private fun saveFavoritesToPreferences(favoriteResorts: Set<String>) {
+        with(sharedPreferences.edit()) {
+            putStringSet(KEY_FAVORITES, favoriteResorts)
+            apply()
+        }
     }
 }
