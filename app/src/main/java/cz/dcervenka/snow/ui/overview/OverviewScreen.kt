@@ -1,15 +1,18 @@
 package cz.dcervenka.snow.ui.overview
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import cz.dcervenka.snow.ui.components.ExpandableAreaList
@@ -21,6 +24,17 @@ fun OverviewScreenRoot(
     onDetailClick: () -> Unit,
     viewModel: OverviewViewModel = hiltViewModel()
 ) {
+    val context = LocalContext.current
+    LaunchedEffect(Unit) {
+        viewModel.errorEvent.collect { error ->
+            Toast.makeText(
+                context,
+                error.asString(context),
+                Toast.LENGTH_LONG
+            ).show()
+        }
+    }
+
     OverviewScreen(
         state = viewModel.state,
         onAction = { action ->
