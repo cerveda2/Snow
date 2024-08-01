@@ -55,6 +55,7 @@ import cz.dcervenka.snow.ui.util.formatTracksAvailable
 fun ExpandableAreaList(
     responseData: ResponseData,
     showOnlyFavorites: Boolean,
+    searchInitiated: Boolean,
     onDetailClick: (String) -> Unit,
     onSetFavorite: (String) -> Unit
 ) {
@@ -83,6 +84,7 @@ fun ExpandableAreaList(
                     resorts = visibleResorts,
                     expanded = expandedAreaIds.contains(area.areaId),
                     showOnlyFavorites = showOnlyFavorites,
+                    searchInitiated = searchInitiated,
                     onClick = {
                         expandedAreaIds = if (expandedAreaIds.contains(area.areaId)) {
                             expandedAreaIds - area.areaId
@@ -104,6 +106,7 @@ fun ExpandableAreaItem(
     resorts: List<Resort>,
     expanded: Boolean,
     showOnlyFavorites: Boolean,
+    searchInitiated: Boolean,
     onClick: () -> Unit,
     onDetailClick: (String) -> Unit,
     onFavoriteClick: (String) -> Unit
@@ -142,7 +145,7 @@ fun ExpandableAreaItem(
                 )
             }
         }
-        if (expanded || showOnlyFavorites) {
+        if (expanded || showOnlyFavorites || searchInitiated) {
             resorts.forEachIndexed { index, resort ->
                 ResortItem(
                     resort = resort,

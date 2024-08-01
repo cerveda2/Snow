@@ -4,8 +4,10 @@ import android.content.SharedPreferences
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import cz.dcervenka.snow.model.ResponseData
 import cz.dcervenka.snow.network.SnowService
 import cz.dcervenka.snow.network.safeCall
 import cz.dcervenka.snow.ui.util.UiText
@@ -28,6 +30,8 @@ class OverviewViewModel @Inject constructor(
     private val sharedPreferences: SharedPreferences,
 ): ViewModel() {
 
+    private lateinit var originalData: ResponseData
+
     var state by mutableStateOf(OverviewState())
         private set
 
@@ -47,6 +51,7 @@ class OverviewViewModel @Inject constructor(
                     is Result.Error -> _errorEvent.send(response.error.asUiText())
                     is Result.Success -> {
                         state = state.copy(data = response.data)
+                        originalData = response.data
                         initializeState()
                     }
                 }
@@ -54,6 +59,23 @@ class OverviewViewModel @Inject constructor(
                 _errorEvent.send(DataError.Network.UNKNOWN.asUiText())
                 Timber.w("Failed to load data or call cancelled")
             }
+        }
+    }
+
+    fun search(query: String) {
+        state = if (query.length >= 2) {
+            val filteredResorts = originalData.resorts?.filter { resort ->
+                resort.name.contains(query, ignoreCase = true)
+            } ?: emptyList()
+            state.copy(
+                data = state.data.copy(resorts = filteredResorts),
+                search = TextFieldValue(query)
+            )
+        } else {
+            state.copy(
+                data = originalData,
+                search = TextFieldValue(query)
+            )
         }
     }
 

@@ -43,7 +43,7 @@ fun OverviewScreenRoot(
                 is OverviewAction.OnFavoriteToggled -> {
                     viewModel.toggleFavorite()
                 }
-                is OverviewAction.OnSearchTextChanged -> Unit
+                is OverviewAction.OnSearchTextChanged -> viewModel.search(action.text)
                 is OverviewAction.OnFavoriteSet -> {
                     viewModel.setFavorite(action.resortId)
                 }
@@ -69,20 +69,21 @@ fun OverviewScreen(
                 textState = searchState,
                 favoriteToggled = state.showOnlyFavorites,
                 onFavoriteToggled = { onAction(OverviewAction.OnFavoriteToggled) },
-                onTextChange = {
-                    searchState = it
-                    onAction(OverviewAction.OnSearchTextChanged(it.text))
+                onTextChange = { newTextValue ->
+                    // Update both searchState and the state.search field
+                    searchState = newTextValue
+                    onAction(OverviewAction.OnSearchTextChanged(newTextValue.text))
                 }
             )
             ExpandableAreaList(
                 responseData = state.data,
                 showOnlyFavorites = state.showOnlyFavorites,
+                searchInitiated = searchState.text.isNotEmpty() && searchState.text.length > 1,
                 onDetailClick = {},
                 onSetFavorite = { resortId -> onAction(OverviewAction.OnFavoriteSet(resortId)) },
             )
         }
     }
-
 }
 
 @Preview
