@@ -2,9 +2,9 @@ package cz.dcervenka.snow.network
 
 import cz.dcervenka.snow.util.DataError
 import cz.dcervenka.snow.util.Result
-import retrofit2.HttpException
 import retrofit2.Response
 import java.io.IOException
+import java.net.SocketTimeoutException
 import kotlin.coroutines.cancellation.CancellationException
 
 inline fun <reified T> safeCall(execute: () -> Response<T>): Result<T, DataError.Network> {
@@ -13,9 +13,9 @@ inline fun <reified T> safeCall(execute: () -> Response<T>): Result<T, DataError
     } catch (e: IOException) {
         e.printStackTrace()
         return Result.Error(DataError.Network.NO_INTERNET)
-    } catch (e: HttpException) {
+    } catch (e: SocketTimeoutException) {
         e.printStackTrace()
-        return Result.Error(DataError.Network.SERIALIZATION)
+        return Result.Error(DataError.Network.REQUEST_TIMEOUT)
     } catch (e: Exception) {
         if (e is CancellationException) throw e
         e.printStackTrace()

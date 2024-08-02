@@ -8,14 +8,11 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import cz.dcervenka.snow.R
 import cz.dcervenka.snow.model.Resort
 import cz.dcervenka.snow.model.ResponseData
 import cz.dcervenka.snow.network.SnowService
 import cz.dcervenka.snow.network.safeCall
 import cz.dcervenka.snow.ui.overview.OverviewState
-import cz.dcervenka.snow.ui.util.UiText
-import cz.dcervenka.snow.ui.util.asUiText
 import cz.dcervenka.snow.util.DataError
 import cz.dcervenka.snow.util.Result
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -49,6 +46,9 @@ class OverviewViewModel @Inject constructor(
     private val _errorEvent = Channel<DataError?>()
     val errorEvent = _errorEvent.receiveAsFlow()
 
+    private val _isLoading = MutableStateFlow(false)
+    val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
+
     init {
         loadPlaces()
         viewModelScope.launch {
@@ -71,17 +71,20 @@ class OverviewViewModel @Inject constructor(
     internal fun loadPlaces() {
         viewModelScope.launch {
             try {
+                _isLoading.value = true
                 val response = safeCall { snowService.loadPlaces() }
                 serverCalled = true
                 when (response) {
                     is Result.Error -> _errorEvent.send(response.error)
                     is Result.Success -> {
                         state = state.copy(data = response.data)
-                        originalData = response.data
                         initializeState()
+                        originalData = state.data
                     }
                 }
+                _isLoading.value = false
             } catch (e: Exception) {
+                _isLoading.value = false
                 _errorEvent.send(DataError.Network.UNKNOWN)
                 Timber.w("Failed to load data or call cancelled")
             }

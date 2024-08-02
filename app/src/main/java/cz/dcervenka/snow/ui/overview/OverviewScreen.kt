@@ -1,12 +1,12 @@
 package cz.dcervenka.snow.ui.overview
 
-import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -38,34 +38,28 @@ fun OverviewScreenRoot(
     onDetailClick: () -> Unit,
     viewModel: OverviewViewModel = hiltViewModel()
 ) {
-    /*val context = LocalContext.current
-    LaunchedEffect(Unit) {
-        viewModel.errorEvent.collect { error ->
-            Toast.makeText(
-                context,
-                error.asUiText().asString(context),
-                Toast.LENGTH_LONG
-            ).show()
-        }
-    }*/
-
     val error by viewModel.errorEvent.collectAsStateWithLifecycle(null)
+    val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
 
     OverviewScreen(
         state = viewModel.state,
         error = error,
+        loading = isLoading,
         onAction = { action ->
             when (action) {
                 OverviewAction.OnFavoriteToggled -> {
                     viewModel.toggleFavorite()
                 }
+
                 OverviewAction.OnRetry -> {
                     viewModel.loadPlaces()
                 }
+
                 is OverviewAction.OnDetailClick -> {
                     viewModel.setDetailResort(action.resortId)
                     onDetailClick()
                 }
+
                 is OverviewAction.OnSearchTextChanged -> viewModel.search(action.text)
                 is OverviewAction.OnFavoriteSet -> {
                     viewModel.setFavorite(
@@ -82,6 +76,7 @@ fun OverviewScreenRoot(
 fun OverviewScreen(
     state: OverviewState,
     error: DataError?,
+    loading: Boolean,
     onAction: (OverviewAction) -> Unit,
 ) {
     var searchState by remember { mutableStateOf(state.search) }
@@ -92,46 +87,61 @@ fun OverviewScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            when (error) {
-                DataError.Network.REQUEST_TIMEOUT,
-                DataError.Network.TOO_MANY_REQUESTS,
-                DataError.Network.NO_INTERNET,
-                DataError.Network.SERVER_ERROR,
-                DataError.Network.NOT_FOUND,
-                DataError.Network.SERIALIZATION,
-                DataError.Network.UNKNOWN -> {
-                    ErrorState(
-                        error = error,
-                        canRetry = true,
-                        retry = { onAction(OverviewAction.OnRetry) }
-                    )
-                }
-                else -> {
-                    SearchTextField(
-                        textState = searchState,
-                        favoriteToggled = state.showOnlyFavorites,
-                        onFavoriteToggled = { onAction(OverviewAction.OnFavoriteToggled) },
-                        onTextChange = { newTextValue ->
-                            searchState = newTextValue
-                            onAction(OverviewAction.OnSearchTextChanged(newTextValue.text))
-                        }
-                    )
-                    if (error == null) {
-                        ExpandableAreaList(
-                            responseData = state.data,
-                            showOnlyFavorites = state.showOnlyFavorites,
-                            searchInitiated = searchState.text.isNotEmpty() && searchState.text.length > 1,
-                            onDetailClick = { resortId ->
-                                onAction(OverviewAction.OnDetailClick(resortId))
-                            },
-                            onSetFavorite = { resortId -> onAction(OverviewAction.OnFavoriteSet(resortId)) },
-                        )
-                    } else {
+            if (loading) {
+                CircularProgressIndicator(
+                    modifier = Modifier
+                        .padding(top = 60.dp)
+                        .align(Alignment.CenterHorizontally)
+                )
+            } else {
+                when (error) {
+                    DataError.Network.REQUEST_TIMEOUT,
+                    DataError.Network.TOO_MANY_REQUESTS,
+                    DataError.Network.NO_INTERNET,
+                    DataError.Network.SERVER_ERROR,
+                    DataError.Network.NOT_FOUND,
+                    DataError.Network.SERIALIZATION,
+                    DataError.Network.UNKNOWN -> {
                         ErrorState(
                             error = error,
-                            canRetry = false,
-                            retry = { }
+                            canRetry = true,
+                            retry = { onAction(OverviewAction.OnRetry) }
                         )
+                    }
+
+                    else -> {
+                        SearchTextField(
+                            textState = searchState,
+                            favoriteToggled = state.showOnlyFavorites,
+                            onFavoriteToggled = { onAction(OverviewAction.OnFavoriteToggled) },
+                            onTextChange = { newTextValue ->
+                                searchState = newTextValue
+                                onAction(OverviewAction.OnSearchTextChanged(newTextValue.text))
+                            }
+                        )
+                        if (error == null) {
+                            ExpandableAreaList(
+                                responseData = state.data,
+                                showOnlyFavorites = state.showOnlyFavorites,
+                                searchInitiated = searchState.text.isNotEmpty() && searchState.text.length > 1,
+                                onDetailClick = { resortId ->
+                                    onAction(OverviewAction.OnDetailClick(resortId))
+                                },
+                                onSetFavorite = { resortId ->
+                                    onAction(
+                                        OverviewAction.OnFavoriteSet(
+                                            resortId
+                                        )
+                                    )
+                                },
+                            )
+                        } else {
+                            ErrorState(
+                                error = error,
+                                canRetry = false,
+                                retry = { }
+                            )
+                        }
                     }
                 }
             }
@@ -183,6 +193,7 @@ private fun OverviewScreenPreview() {
         OverviewScreen(
             state = OverviewState(),
             error = null,
+            loading = false,
             onAction = {}
         )
     }
