@@ -1,4 +1,4 @@
-package cz.dcervenka.snow.ui.overview
+package cz.dcervenka.snow.ui
 
 import android.content.SharedPreferences
 import androidx.compose.runtime.getValue
@@ -7,15 +7,20 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import cz.dcervenka.snow.model.Resort
 import cz.dcervenka.snow.model.ResponseData
 import cz.dcervenka.snow.network.SnowService
 import cz.dcervenka.snow.network.safeCall
+import cz.dcervenka.snow.ui.overview.OverviewState
 import cz.dcervenka.snow.ui.util.UiText
 import cz.dcervenka.snow.ui.util.asUiText
 import cz.dcervenka.snow.util.DataError
 import cz.dcervenka.snow.util.Result
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -31,6 +36,9 @@ class OverviewViewModel @Inject constructor(
 ): ViewModel() {
 
     private lateinit var originalData: ResponseData
+
+    private val _detailResort = MutableStateFlow<Resort?>(null)
+    val detailResort: StateFlow<Resort?> = _detailResort.asStateFlow()
 
     var state by mutableStateOf(OverviewState())
         private set
@@ -83,7 +91,7 @@ class OverviewViewModel @Inject constructor(
         state = state.copy(showOnlyFavorites = !state.showOnlyFavorites)
     }
 
-    fun setFavorite(resortId: String) {
+    fun setFavorite(resortId: String, fromDetail: Boolean) {
         val updatedResorts = state.data.resorts?.map { resort ->
             if (resort.resortId == resortId) {
                 resort.copy(favorite = !resort.favorite)
@@ -91,6 +99,11 @@ class OverviewViewModel @Inject constructor(
                 resort
             }
         }
+
+        if (fromDetail) {
+            _detailResort.value = updatedResorts?.find { it.resortId == resortId }
+        }
+
         val updatedData = state.data.copy(resorts = updatedResorts)
         state = state.copy(data = updatedData)
 
@@ -117,5 +130,9 @@ class OverviewViewModel @Inject constructor(
             putStringSet(KEY_FAVORITES, favoriteResorts)
             apply()
         }
+    }
+
+    internal fun setDetailResort(resortId: String) {
+        _detailResort.value = state.data.resorts?.find { it.resortId == resortId }
     }
 }

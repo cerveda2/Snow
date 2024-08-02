@@ -1,9 +1,7 @@
 package cz.dcervenka.snow.ui.util
 
-import cz.dcervenka.snow.model.SnowType
-
-fun formatTemperature(temp: Int?): String {
-    val temperature = temp ?: "?"
+fun Int?.formatTemperature(): String {
+    val temperature = this ?: "?"
 
     return "$temperature °C"
 }
@@ -15,15 +13,20 @@ fun formatTracksAvailable(tracksOpen: Float?, tracksTotal: Float?): String {
     return "$track1 z $track2 km tratí v provozu"
 }
 
-fun formatSnowType(snowType: SnowType?): String {
-    return when (snowType) {
-        SnowType.WATERY -> "Mokrý"
-        SnowType.POWDERY -> "Prachový"
-        SnowType.WET -> "Vlhký"
-        SnowType.FROZEN -> "Zmrzlý"
-        SnowType.FIRN -> "Firn"
-        SnowType.ARTIFICIAL -> "Technický"
-        else -> "Neznámý"
-    }
+fun formatSnow(snowMin: Int?, snowMax: Int?, snowNew: Int?): String {
+    return if (snowMin != null && snowMax != null && snowNew != null) {
+        "$snowMin - $snowMax + $snowNew cm"
+    } else "0 m sněhu"
 }
 
+fun Int?.formatLiftsTotal(): String {
+    return this?.let {
+        "z $it vleků"
+    } ?: ""
+}
+
+fun Float?.formatTracksTotal(): String {
+    return this?.let {
+        "z $it km"
+    } ?: ""
+}

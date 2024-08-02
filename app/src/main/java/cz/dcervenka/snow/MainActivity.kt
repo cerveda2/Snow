@@ -9,11 +9,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import cz.dcervenka.snow.ui.detail.DetailScreenRoot
 import cz.dcervenka.snow.ui.overview.OverviewScreenRoot
+import cz.dcervenka.snow.ui.OverviewViewModel
 import cz.dcervenka.snow.ui.theme.SnowTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -29,6 +31,7 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     val navController = rememberNavController()
+                    val viewModel: OverviewViewModel = hiltViewModel()
                     NavHost(
                         navController = navController,
                         startDestination = "overview",
@@ -36,12 +39,14 @@ class MainActivity : ComponentActivity() {
                         composable(route = "overview") {
                             OverviewScreenRoot(
                                 onDetailClick = { navController.navigate("detail") },
+                                viewModel = viewModel,
                             )
                         }
                         composable(route = "detail") {
                             DetailScreenRoot(
                                 onMoreInfoClick = { /*TODO*/ },
                                 onBackClick = { navController.navigateUp() },
+                                viewModel = viewModel,
                             )
                         }
                     }

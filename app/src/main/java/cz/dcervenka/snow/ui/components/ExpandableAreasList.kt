@@ -47,7 +47,6 @@ import cz.dcervenka.snow.model.ResponseData
 import cz.dcervenka.snow.ui.theme.ColombiaBlue
 import cz.dcervenka.snow.ui.theme.ErrorRed
 import cz.dcervenka.snow.ui.theme.SuccessGreen
-import cz.dcervenka.snow.ui.util.formatSnowType
 import cz.dcervenka.snow.ui.util.formatTemperature
 import cz.dcervenka.snow.ui.util.formatTracksAvailable
 
@@ -200,7 +199,7 @@ fun ResortItem(
             )
             Spacer(modifier = Modifier.weight(1f))
             Text(
-                text = formatTemperature(resort.temperature),
+                text = resort.temperature.formatTemperature(),
                 fontSize = 16.sp,
                 fontWeight = FontWeight.SemiBold,
                 modifier = Modifier
@@ -223,7 +222,7 @@ fun ResortItem(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = formatSnowType(resort.snowType),
+                text = resort.snowType?.title ?: "Neznámý",
                 modifier = Modifier
                     .padding(bottom = 2.dp)
                     .background(ColombiaBlue, RoundedCornerShape(8.dp))

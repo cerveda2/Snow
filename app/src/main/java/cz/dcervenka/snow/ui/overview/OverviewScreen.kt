@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
+import cz.dcervenka.snow.ui.OverviewViewModel
 import cz.dcervenka.snow.ui.components.ExpandableAreaList
 import cz.dcervenka.snow.ui.components.SearchTextField
 import cz.dcervenka.snow.ui.theme.SnowTheme
@@ -39,13 +40,19 @@ fun OverviewScreenRoot(
         state = viewModel.state,
         onAction = { action ->
             when (action) {
-                OverviewAction.OnDetailClick -> onDetailClick()
-                is OverviewAction.OnFavoriteToggled -> {
+                OverviewAction.OnFavoriteToggled -> {
                     viewModel.toggleFavorite()
+                }
+                is OverviewAction.OnDetailClick -> {
+                    viewModel.setDetailResort(action.resortId)
+                    onDetailClick()
                 }
                 is OverviewAction.OnSearchTextChanged -> viewModel.search(action.text)
                 is OverviewAction.OnFavoriteSet -> {
-                    viewModel.setFavorite(action.resortId)
+                    viewModel.setFavorite(
+                        resortId = action.resortId,
+                        fromDetail = false
+                    )
                 }
             }
         }
@@ -70,7 +77,6 @@ fun OverviewScreen(
                 favoriteToggled = state.showOnlyFavorites,
                 onFavoriteToggled = { onAction(OverviewAction.OnFavoriteToggled) },
                 onTextChange = { newTextValue ->
-                    // Update both searchState and the state.search field
                     searchState = newTextValue
                     onAction(OverviewAction.OnSearchTextChanged(newTextValue.text))
                 }
@@ -79,7 +85,9 @@ fun OverviewScreen(
                 responseData = state.data,
                 showOnlyFavorites = state.showOnlyFavorites,
                 searchInitiated = searchState.text.isNotEmpty() && searchState.text.length > 1,
-                onDetailClick = {},
+                onDetailClick = { resortId ->
+                    onAction(OverviewAction.OnDetailClick(resortId))
+                },
                 onSetFavorite = { resortId -> onAction(OverviewAction.OnFavoriteSet(resortId)) },
             )
         }

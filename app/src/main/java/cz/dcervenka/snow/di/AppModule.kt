@@ -2,7 +2,7 @@ package cz.dcervenka.snow.di
 
 import android.content.Context
 import android.content.SharedPreferences
-import cz.dcervenka.snow.ui.overview.SHARED_PREFERENCES_NAME
+import cz.dcervenka.snow.ui.SHARED_PREFERENCES_NAME
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

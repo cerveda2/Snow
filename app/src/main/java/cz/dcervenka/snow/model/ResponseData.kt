@@ -1,6 +1,7 @@
 package cz.dcervenka.snow.model
 
 import com.squareup.moshi.JsonClass
+import cz.dcervenka.snow.R
 
 @JsonClass(generateAdapter = true)
 data class ResponseData(
@@ -32,12 +33,11 @@ data class Resort(
     val favorite: Boolean = false
 )
 
-enum class SnowType {
-    // "mokrý", "prachový", "vlhký", "zmrzlý", "firn", "technický"
-    WATERY,
-    POWDERY,
-    WET,
-    FROZEN,
-    FIRN,
-    ARTIFICIAL
+enum class SnowType(val title: String, val iconResId: Int) {
+    WATERY("Mokrý", R.drawable.watery),
+    POWDERY("Prachový", R.drawable.powdery),
+    WET("Vlhký", R.drawable.wet),
+    FROZEN("Zmrzlý", R.drawable.frozen),
+    FIRN("Firn", R.drawable.firn),
+    ARTIFICIAL("Technický", R.drawable.artificial)
 }
