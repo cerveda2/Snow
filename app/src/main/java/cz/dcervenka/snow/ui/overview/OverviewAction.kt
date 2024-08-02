@@ -5,4 +5,5 @@ sealed interface OverviewAction {
     data class OnSearchTextChanged(val text: String) : OverviewAction
     data object OnFavoriteToggled : OverviewAction
     data class OnFavoriteSet(val resortId: String) : OverviewAction
+    data object OnRetry : OverviewAction
 }

@@ -4,9 +4,11 @@ import android.content.SharedPreferences
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import cz.dcervenka.snow.R
 import cz.dcervenka.snow.model.Resort
 import cz.dcervenka.snow.model.ResponseData
 import cz.dcervenka.snow.network.SnowService
@@ -36,6 +38,7 @@ class OverviewViewModel @Inject constructor(
 ): ViewModel() {
 
     private lateinit var originalData: ResponseData
+    private var serverCalled = false
 
     private val _detailResort = MutableStateFlow<Resort?>(null)
     val detailResort: StateFlow<Resort?> = _detailResort.asStateFlow()
@@ -43,20 +46,35 @@ class OverviewViewModel @Inject constructor(
     var state by mutableStateOf(OverviewState())
         private set
 
-    private val _errorEvent = Channel<UiText>()
+    private val _errorEvent = Channel<DataError?>()
     val errorEvent = _errorEvent.receiveAsFlow()
-
 
     init {
         loadPlaces()
+        viewModelScope.launch {
+            snapshotFlow { state }
+                .collect { state ->
+                    if (!serverCalled) {
+                        return@collect
+                    }
+                    if (state.data.resorts.isNullOrEmpty()) {
+                        _errorEvent.send(DataError.Local.SEARCH_EMPTY)
+                    } else if (state.showOnlyFavorites && state.data.resorts.none { it.favorite }) {
+                        _errorEvent.send(DataError.Local.NO_FAVORITES)
+                    } else {
+                        _errorEvent.send(null)
+                    }
+                }
+        }
     }
 
-    private fun loadPlaces() {
+    internal fun loadPlaces() {
         viewModelScope.launch {
             try {
                 val response = safeCall { snowService.loadPlaces() }
+                serverCalled = true
                 when (response) {
-                    is Result.Error -> _errorEvent.send(response.error.asUiText())
+                    is Result.Error -> _errorEvent.send(response.error)
                     is Result.Success -> {
                         state = state.copy(data = response.data)
                         originalData = response.data
@@ -64,7 +82,7 @@ class OverviewViewModel @Inject constructor(
                     }
                 }
             } catch (e: Exception) {
-                _errorEvent.send(DataError.Network.UNKNOWN.asUiText())
+                _errorEvent.send(DataError.Network.UNKNOWN)
                 Timber.w("Failed to load data or call cancelled")
             }
         }

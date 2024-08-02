@@ -38,9 +38,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import cz.dcervenka.snow.R
 import cz.dcervenka.snow.model.Area
 import cz.dcervenka.snow.model.Resort
 import cz.dcervenka.snow.model.ResponseData
@@ -56,7 +58,7 @@ fun ExpandableAreaList(
     showOnlyFavorites: Boolean,
     searchInitiated: Boolean,
     onDetailClick: (String) -> Unit,
-    onSetFavorite: (String) -> Unit
+    onSetFavorite: (String) -> Unit,
 ) {
 
     val areas = responseData.areas ?: emptyList()
@@ -124,8 +126,8 @@ fun ExpandableAreaItem(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .clickable { onClick() }
                 .clip(RoundedCornerShape(8.dp))
+                .clickable { onClick() }
                 .background(MaterialTheme.colorScheme.primaryContainer)
                 .padding(12.dp),
         ) {
@@ -222,7 +224,9 @@ fun ResortItem(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = resort.snowType?.title ?: "Neznámý",
+                text = stringResource(
+                    id = resort.snowType?.stringResId ?: R.string.snow_type_unknown
+                ),
                 modifier = Modifier
                     .padding(bottom = 2.dp)
                     .background(ColombiaBlue, RoundedCornerShape(8.dp))

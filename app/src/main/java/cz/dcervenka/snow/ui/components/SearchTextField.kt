@@ -24,9 +24,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import cz.dcervenka.snow.R
 
 @Composable
 fun SearchTextField(
@@ -48,7 +50,7 @@ fun SearchTextField(
             .onFocusChanged { focusState ->
                 isFocused = focusState.isFocused
             },
-        placeholder = { Text(text = "Najít středisko") },
+        placeholder = { Text(text = stringResource(R.string.search_resort_hint)) },
         leadingIcon = {
             Icon(
                 imageVector = Icons.Default.Search,

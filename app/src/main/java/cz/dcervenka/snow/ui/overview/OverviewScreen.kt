@@ -1,47 +1,66 @@
 package cz.dcervenka.snow.ui.overview
 
-import android.widget.Toast
+import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import cz.dcervenka.snow.R
 import cz.dcervenka.snow.ui.OverviewViewModel
 import cz.dcervenka.snow.ui.components.ExpandableAreaList
 import cz.dcervenka.snow.ui.components.SearchTextField
 import cz.dcervenka.snow.ui.theme.SnowTheme
+import cz.dcervenka.snow.ui.util.asUiText
+import cz.dcervenka.snow.util.DataError
 
 @Composable
 fun OverviewScreenRoot(
     onDetailClick: () -> Unit,
     viewModel: OverviewViewModel = hiltViewModel()
 ) {
-    val context = LocalContext.current
+    /*val context = LocalContext.current
     LaunchedEffect(Unit) {
         viewModel.errorEvent.collect { error ->
             Toast.makeText(
                 context,
-                error.asString(context),
+                error.asUiText().asString(context),
                 Toast.LENGTH_LONG
             ).show()
         }
-    }
+    }*/
+
+    val error by viewModel.errorEvent.collectAsStateWithLifecycle(null)
 
     OverviewScreen(
         state = viewModel.state,
+        error = error,
         onAction = { action ->
             when (action) {
                 OverviewAction.OnFavoriteToggled -> {
                     viewModel.toggleFavorite()
+                }
+                OverviewAction.OnRetry -> {
+                    viewModel.loadPlaces()
                 }
                 is OverviewAction.OnDetailClick -> {
                     viewModel.setDetailResort(action.resortId)
@@ -62,6 +81,7 @@ fun OverviewScreenRoot(
 @Composable
 fun OverviewScreen(
     state: OverviewState,
+    error: DataError?,
     onAction: (OverviewAction) -> Unit,
 ) {
     var searchState by remember { mutableStateOf(state.search) }
@@ -72,24 +92,86 @@ fun OverviewScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            SearchTextField(
-                textState = searchState,
-                favoriteToggled = state.showOnlyFavorites,
-                onFavoriteToggled = { onAction(OverviewAction.OnFavoriteToggled) },
-                onTextChange = { newTextValue ->
-                    searchState = newTextValue
-                    onAction(OverviewAction.OnSearchTextChanged(newTextValue.text))
+            when (error) {
+                DataError.Network.REQUEST_TIMEOUT,
+                DataError.Network.TOO_MANY_REQUESTS,
+                DataError.Network.NO_INTERNET,
+                DataError.Network.SERVER_ERROR,
+                DataError.Network.NOT_FOUND,
+                DataError.Network.SERIALIZATION,
+                DataError.Network.UNKNOWN -> {
+                    ErrorState(
+                        error = error,
+                        canRetry = true,
+                        retry = { onAction(OverviewAction.OnRetry) }
+                    )
                 }
-            )
-            ExpandableAreaList(
-                responseData = state.data,
-                showOnlyFavorites = state.showOnlyFavorites,
-                searchInitiated = searchState.text.isNotEmpty() && searchState.text.length > 1,
-                onDetailClick = { resortId ->
-                    onAction(OverviewAction.OnDetailClick(resortId))
-                },
-                onSetFavorite = { resortId -> onAction(OverviewAction.OnFavoriteSet(resortId)) },
-            )
+                else -> {
+                    SearchTextField(
+                        textState = searchState,
+                        favoriteToggled = state.showOnlyFavorites,
+                        onFavoriteToggled = { onAction(OverviewAction.OnFavoriteToggled) },
+                        onTextChange = { newTextValue ->
+                            searchState = newTextValue
+                            onAction(OverviewAction.OnSearchTextChanged(newTextValue.text))
+                        }
+                    )
+                    if (error == null) {
+                        ExpandableAreaList(
+                            responseData = state.data,
+                            showOnlyFavorites = state.showOnlyFavorites,
+                            searchInitiated = searchState.text.isNotEmpty() && searchState.text.length > 1,
+                            onDetailClick = { resortId ->
+                                onAction(OverviewAction.OnDetailClick(resortId))
+                            },
+                            onSetFavorite = { resortId -> onAction(OverviewAction.OnFavoriteSet(resortId)) },
+                        )
+                    } else {
+                        ErrorState(
+                            error = error,
+                            canRetry = false,
+                            retry = { }
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ErrorState(
+    error: DataError,
+    canRetry: Boolean,
+    retry: () -> Unit,
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 20.dp)
+            .padding(top = 60.dp),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Icon(
+            modifier = Modifier.padding(8.dp),
+            painter = painterResource(id = R.drawable.mountain),
+            contentDescription = null
+        )
+        Text(
+            text = error.asUiText().asString(),
+            textAlign = TextAlign.Center,
+            fontWeight = FontWeight.SemiBold,
+            fontSize = 20.sp,
+        )
+        if (canRetry) {
+            Button(
+                modifier = Modifier
+                    .padding(20.dp),
+                onClick = retry
+            ) {
+                Text(text = "Retry")
+            }
         }
     }
 }
@@ -100,6 +182,7 @@ private fun OverviewScreenPreview() {
     SnowTheme {
         OverviewScreen(
             state = OverviewState(),
+            error = null,
             onAction = {}
         )
     }

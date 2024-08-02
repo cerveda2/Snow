@@ -33,11 +33,11 @@ data class Resort(
     val favorite: Boolean = false
 )
 
-enum class SnowType(val title: String, val iconResId: Int) {
-    WATERY("Mokrý", R.drawable.watery),
-    POWDERY("Prachový", R.drawable.powdery),
-    WET("Vlhký", R.drawable.wet),
-    FROZEN("Zmrzlý", R.drawable.frozen),
-    FIRN("Firn", R.drawable.firn),
-    ARTIFICIAL("Technický", R.drawable.artificial)
+enum class SnowType(val stringResId: Int, val iconResId: Int) {
+    WATERY(R.string.snow_type_watery, R.drawable.watery),
+    POWDERY(R.string.snow_type_powdery, R.drawable.powdery),
+    WET(R.string.snow_type_wet, R.drawable.wet),
+    FROZEN(R.string.snow_type_frozen, R.drawable.frozen),
+    FIRN(R.string.snow_type_firn, R.drawable.firn),
+    ARTIFICIAL(R.string.snow_type_artificial, R.drawable.artificial)
 }

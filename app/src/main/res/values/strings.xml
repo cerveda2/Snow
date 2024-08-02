@@ -8,4 +8,15 @@
     <string name="error_server_error">Oops, something went wrong, please try again</string>
     <string name="error_serialization">Oops, couldn\'t parse data</string>
     <string name="error_unknown">An unknown error occurred</string>
+    <string name="snow_type_watery">Mokrý</string>
+    <string name="snow_type_powdery">Prachový</string>
+    <string name="snow_type_wet">Vlhký</string>
+    <string name="snow_type_frozen">Zmrzlý</string>
+    <string name="snow_type_firn">Firn</string>
+    <string name="snow_type_artificial">Technický</string>
+    <string name="snow_type_unknown">Neznámý</string>
+    <string name="search_resort_hint">Najít středisko</string>
+    <string name="error_search_empty">Nenašli jsme odpovídající středisko</string>
+    <string name="error_no_favorites">Nemáte označeno žádné oblíbené středisko</string>
+    <string name="error_not_found">Server not found</string>
 </resources>

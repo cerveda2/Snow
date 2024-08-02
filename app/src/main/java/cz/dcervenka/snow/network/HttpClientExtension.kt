@@ -30,8 +30,8 @@ inline fun <reified T> responseToResult(response: Response<T>): Result<T, DataEr
         in 200..299 -> response.body()?.let {
             Result.Success(it)
         } ?: Result.Error(DataError.Network.SERIALIZATION)
+        404 -> Result.Error(DataError.Network.NOT_FOUND)
         408 -> Result.Error(DataError.Network.REQUEST_TIMEOUT)
-        409 -> Result.Error(DataError.Network.CONFLICT)
         429 -> Result.Error(DataError.Network.TOO_MANY_REQUESTS)
         in 500..599 -> Result.Error(DataError.Network.SERVER_ERROR)
         else -> Result.Error(DataError.Network.UNKNOWN)
