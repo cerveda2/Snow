@@ -32,7 +32,7 @@ const val KEY_FAVORITES = "KEY_FAVORITES"
 class OverviewViewModel @Inject constructor(
     private val snowService: SnowService,
     private val sharedPreferences: SharedPreferences,
-): ViewModel() {
+) : ViewModel() {
 
     private lateinit var originalData: ResponseData
     private var serverCalled = false
@@ -113,6 +113,13 @@ class OverviewViewModel @Inject constructor(
     }
 
     fun setFavorite(resortId: String, fromDetail: Boolean) {
+        val updatedOriginalResorts = originalData.resorts?.map { resort ->
+            if (resort.resortId == resortId) {
+                resort.copy(favorite = !resort.favorite)
+            } else {
+                resort
+            }
+        }
         val updatedResorts = state.data.resorts?.map { resort ->
             if (resort.resortId == resortId) {
                 resort.copy(favorite = !resort.favorite)
@@ -128,7 +135,9 @@ class OverviewViewModel @Inject constructor(
         val updatedData = state.data.copy(resorts = updatedResorts)
         state = state.copy(data = updatedData)
 
-        val favoriteResorts = updatedResorts?.filter { it.favorite }?.map { it.resortId }?.toSet() ?: emptySet()
+        originalData = originalData.copy(resorts = updatedOriginalResorts)
+
+        val favoriteResorts = updatedOriginalResorts?.filter { it.favorite }?.map { it.resortId }?.toSet() ?: emptySet()
         saveFavoritesToPreferences(favoriteResorts)
     }
 

@@ -58,7 +58,7 @@ fun SearchTextField(
             )
         },
         trailingIcon = {
-            if (isFocused) {
+            if (isFocused || textState.text.isNotEmpty()) {
                 Icon(
                     imageVector = Icons.Default.Clear,
                     contentDescription = "Clear",
