@@ -42,7 +42,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cz.dcervenka.snow.R
 import cz.dcervenka.snow.model.Resort
 import cz.dcervenka.snow.model.SnowType
-import cz.dcervenka.snow.ui.OverviewViewModel
+import cz.dcervenka.snow.ui.BaseViewModel
 import cz.dcervenka.snow.ui.theme.ColombiaBlue
 import cz.dcervenka.snow.ui.theme.Orange
 import cz.dcervenka.snow.ui.theme.SnowTheme
@@ -55,7 +55,7 @@ import cz.dcervenka.snow.ui.util.formatTracksTotal
 fun DetailScreenRoot(
     onMoreInfoClick: (String?) -> Unit,
     onBackClick: () -> Unit,
-    viewModel: OverviewViewModel = hiltViewModel()
+    viewModel: BaseViewModel = hiltViewModel()
 ) {
     val resort by viewModel.detailResort.collectAsStateWithLifecycle()
 

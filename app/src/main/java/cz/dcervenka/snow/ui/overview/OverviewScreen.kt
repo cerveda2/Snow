@@ -26,7 +26,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cz.dcervenka.snow.R
-import cz.dcervenka.snow.ui.OverviewViewModel
+import cz.dcervenka.snow.ui.BaseViewModel
 import cz.dcervenka.snow.ui.components.ExpandableAreaList
 import cz.dcervenka.snow.ui.components.SearchTextField
 import cz.dcervenka.snow.ui.theme.SnowTheme
@@ -36,7 +36,7 @@ import cz.dcervenka.snow.util.DataError
 @Composable
 fun OverviewScreenRoot(
     onDetailClick: () -> Unit,
-    viewModel: OverviewViewModel = hiltViewModel()
+    viewModel: BaseViewModel = hiltViewModel()
 ) {
     val error by viewModel.errorEvent.collectAsStateWithLifecycle(null)
     val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()

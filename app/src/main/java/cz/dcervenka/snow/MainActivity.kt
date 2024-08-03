@@ -17,7 +17,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import cz.dcervenka.snow.ui.detail.DetailScreenRoot
 import cz.dcervenka.snow.ui.overview.OverviewScreenRoot
-import cz.dcervenka.snow.ui.OverviewViewModel
+import cz.dcervenka.snow.ui.BaseViewModel
 import cz.dcervenka.snow.ui.theme.SnowTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -33,7 +33,7 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     val navController = rememberNavController()
-                    val viewModel: OverviewViewModel = hiltViewModel()
+                    val viewModel: BaseViewModel = hiltViewModel()
                     NavHost(
                         navController = navController,
                         startDestination = "overview",

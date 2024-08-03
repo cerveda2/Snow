@@ -29,7 +29,7 @@ const val SHARED_PREFERENCES_NAME = "sharedPref"
 const val KEY_FAVORITES = "KEY_FAVORITES"
 
 @HiltViewModel
-class OverviewViewModel @Inject constructor(
+class BaseViewModel @Inject constructor(
     private val snowService: SnowService,
     private val sharedPreferences: SharedPreferences,
 ) : ViewModel() {
