@@ -1,8 +1,10 @@
 package cz.dcervenka.snow.network
 
+import com.squareup.moshi.JsonDataException
 import cz.dcervenka.snow.util.DataError
 import cz.dcervenka.snow.util.Result
 import retrofit2.Response
+import timber.log.Timber
 import java.io.IOException
 import java.net.SocketTimeoutException
 import kotlin.coroutines.cancellation.CancellationException
@@ -11,14 +13,17 @@ inline fun <reified T> safeCall(execute: () -> Response<T>): Result<T, DataError
     val response: Response<T> = try {
         execute()
     } catch (e: IOException) {
-        e.printStackTrace()
+        Timber.e(e)
         return Result.Error(DataError.Network.NO_INTERNET)
     } catch (e: SocketTimeoutException) {
-        e.printStackTrace()
+        Timber.e(e)
         return Result.Error(DataError.Network.REQUEST_TIMEOUT)
+    } catch (e: JsonDataException) {
+        Timber.e(e)
+        return Result.Error(DataError.Network.SERIALIZATION)
     } catch (e: Exception) {
         if (e is CancellationException) throw e
-        e.printStackTrace()
+        Timber.e(e)
         return Result.Error(DataError.Network.UNKNOWN)
     }
 

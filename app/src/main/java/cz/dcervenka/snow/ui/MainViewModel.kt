@@ -34,7 +34,7 @@ class OverviewViewModel @Inject constructor(
     private val sharedPreferences: SharedPreferences,
 ) : ViewModel() {
 
-    private lateinit var originalData: ResponseData
+    private var originalData: ResponseData = ResponseData()
     private var serverCalled = false
 
     private val _detailResort = MutableStateFlow<Resort?>(null)

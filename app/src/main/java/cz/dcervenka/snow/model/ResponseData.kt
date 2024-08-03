@@ -30,6 +30,7 @@ data class Resort(
     val liftOpen: Int?,
     val tracksTotalKm: Float?,
     val tracksOpenKm: Float?,
+    val url: String?,
     val favorite: Boolean = false
 )
 

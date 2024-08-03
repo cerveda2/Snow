@@ -1,5 +1,7 @@
 package cz.dcervenka.snow
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -44,7 +46,13 @@ class MainActivity : ComponentActivity() {
                         }
                         composable(route = "detail") {
                             DetailScreenRoot(
-                                onMoreInfoClick = { /*TODO*/ },
+                                onMoreInfoClick = { url ->
+                                    if (url != null) {
+                                        val browserIntent =
+                                            Intent(Intent.ACTION_VIEW, Uri.parse(url))
+                                        startActivity(browserIntent)
+                                    }
+                                },
                                 onBackClick = { navController.navigateUp() },
                                 viewModel = viewModel,
                             )

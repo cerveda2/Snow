@@ -17,6 +17,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -52,7 +53,7 @@ import cz.dcervenka.snow.ui.util.formatTracksTotal
 
 @Composable
 fun DetailScreenRoot(
-    onMoreInfoClick: () -> Unit,
+    onMoreInfoClick: (String?) -> Unit,
     onBackClick: () -> Unit,
     viewModel: OverviewViewModel = hiltViewModel()
 ) {
@@ -67,7 +68,9 @@ fun DetailScreenRoot(
         resort = nonNullResort,
         onAction = { action ->
             when (action) {
-                DetailAction.OnVisitPlace -> onMoreInfoClick()
+                DetailAction.OnVisitPlace -> onMoreInfoClick(
+                    viewModel.detailResort.value?.url
+                )
                 DetailAction.OnBackClick -> onBackClick()
                 is DetailAction.OnFavoriteSet -> {
                     viewModel.setFavorite(
@@ -196,6 +199,15 @@ fun DetailScreen(
                     backgroundColor = ColombiaBlue
                 )
             }
+            Spacer(modifier = Modifier.weight(1f))
+            Button(
+                modifier = Modifier
+                    .padding(16.dp)
+                    .align(Alignment.CenterHorizontally),
+                onClick = { onAction(DetailAction.OnVisitPlace) }
+            ) {
+                Text(text = "Zobrazit více")
+            }
         }
     }
 }
@@ -257,6 +269,7 @@ private fun DetailScreenPreview() {
                 liftOpen = 11,
                 tracksTotalKm = 5.4f,
                 tracksOpenKm = 3.1f,
+                url = "",
                 favorite = true
             ),
             onAction = {}
