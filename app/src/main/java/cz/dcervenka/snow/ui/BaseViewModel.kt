@@ -92,6 +92,9 @@ class BaseViewModel @Inject constructor(
     }
 
     fun search(query: String) {
+        if (query.isNotEmpty() && state.showOnlyFavorites) {
+            toggleFavorite()
+        }
         state = if (query.length >= 2) {
             val filteredResorts = originalData.resorts?.filter { resort ->
                 resort.name.contains(query, ignoreCase = true)

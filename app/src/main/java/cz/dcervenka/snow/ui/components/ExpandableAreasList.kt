@@ -1,12 +1,7 @@
 package cz.dcervenka.snow.ui.components
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -30,8 +25,10 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -60,11 +57,33 @@ fun ExpandableAreaList(
     onDetailClick: (String) -> Unit,
     onSetFavorite: (String) -> Unit,
 ) {
-
     val areas = responseData.areas ?: emptyList()
     val resorts = responseData.resorts ?: emptyList()
 
+    // State to track which areas are expanded by the user
     var expandedAreaIds by rememberSaveable { mutableStateOf<Set<String>>(emptySet()) }
+    // State to save the user's expanded areas before filters are applied
+    var savedExpandedAreaIds by rememberSaveable { mutableStateOf<Set<String>>(emptySet()) }
+    // Remember the previous values of the filters
+    val previousFilters = remember { mutableStateOf(showOnlyFavorites to searchInitiated) }
+
+    LaunchedEffect(showOnlyFavorites, searchInitiated) {
+        if (previousFilters.value != showOnlyFavorites to searchInitiated) {
+            previousFilters.value = showOnlyFavorites to searchInitiated
+
+            if (showOnlyFavorites || searchInitiated) {
+                // Save the current expanded state before applying the filter
+                savedExpandedAreaIds = expandedAreaIds
+                // Expand all areas with visible resorts when filters are applied
+                expandedAreaIds = areas.filter { area ->
+                    resorts.any { it.areaId == area.areaId && (it.favorite || !showOnlyFavorites) }
+                }.map { it.areaId }.toSet()
+            } else {
+                // Restore the previous expanded state when filters are removed
+                expandedAreaIds = savedExpandedAreaIds
+            }
+        }
+    }
 
     LazyColumn {
         items(areas) { area ->
@@ -75,17 +94,11 @@ fun ExpandableAreaList(
             }
 
             // Only display the area if there are visible resorts
-            AnimatedVisibility(
-                visible = visibleResorts.isNotEmpty(),
-                enter = fadeIn() + expandVertically(),
-                exit = fadeOut() + shrinkVertically()
-            ) {
+            if (visibleResorts.isNotEmpty()) {
                 ExpandableAreaItem(
                     area = area,
                     resorts = visibleResorts,
                     expanded = expandedAreaIds.contains(area.areaId),
-                    showOnlyFavorites = showOnlyFavorites,
-                    searchInitiated = searchInitiated,
                     onClick = {
                         expandedAreaIds = if (expandedAreaIds.contains(area.areaId)) {
                             expandedAreaIds - area.areaId
@@ -94,7 +107,7 @@ fun ExpandableAreaList(
                         }
                     },
                     onDetailClick = onDetailClick,
-                    onFavoriteClick = onSetFavorite,
+                    onFavoriteClick = onSetFavorite
                 )
             }
         }
@@ -106,8 +119,6 @@ fun ExpandableAreaItem(
     area: Area,
     resorts: List<Resort>,
     expanded: Boolean,
-    showOnlyFavorites: Boolean,
-    searchInitiated: Boolean,
     onClick: () -> Unit,
     onDetailClick: (String) -> Unit,
     onFavoriteClick: (String) -> Unit
@@ -146,7 +157,7 @@ fun ExpandableAreaItem(
                 )
             }
         }
-        if (expanded || showOnlyFavorites || searchInitiated) {
+        if (expanded) {
             resorts.forEachIndexed { index, resort ->
                 ResortItem(
                     resort = resort,
